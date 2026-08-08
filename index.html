@@ -104,7 +104,9 @@ const SIGNAL_POLL_MS = 1000;
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
 
-let roomId = params.get("room");
+// 固定チャットルームID
+const FIXED_ROOM_ID = "ryo1031jun0106";
+let roomId = FIXED_ROOM_ID;
 let myName = localStorage.getItem("chat_name") || "";
 let lastId = 0;
 let lastSignalId = 0;
@@ -122,8 +124,7 @@ const iceServers = [
 ];
 
 function makeRoomId(){
-  if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
-  return Math.random().toString(36).slice(2)+Date.now().toString(36);
+  return FIXED_ROOM_ID;
 }
 
 function escapeHtml(s){
@@ -155,12 +156,10 @@ function startChat(){
   if(!myName){$("setupError").textContent="名前を入力してください。";return;}
   localStorage.setItem("chat_name",myName);
 
-  if(!roomId){
-    roomId=makeRoomId();
-    const u=new URL(location.href);
-    u.searchParams.set("room",roomId);
-    history.replaceState(null,"",u);
-  }
+  roomId = FIXED_ROOM_ID;
+  const u=new URL(location.href);
+  u.searchParams.set("room",roomId);
+  history.replaceState(null,"",u);
 
   $("roomLabel").textContent="ROOM: "+roomId;
   $("setup").classList.add("hidden");
@@ -451,12 +450,12 @@ window.addEventListener("beforeunload",()=>{
 });
 
 if(myName){
-  if(!roomId){
-    roomId=makeRoomId();
-    const u=new URL(location.href);
-    u.searchParams.set("room",roomId);
+  const u=new URL(location.href);
+  if(u.searchParams.get("room") !== FIXED_ROOM_ID){
+    u.searchParams.set("room", FIXED_ROOM_ID);
     history.replaceState(null,"",u);
   }
+  roomId = FIXED_ROOM_ID;
   $("roomLabel").textContent="ROOM: "+roomId;
   $("setup").classList.add("hidden");
   loadMessages(true);
